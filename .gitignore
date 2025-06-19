@@ -1,3 +1,5 @@
-.sqlite3
-/__pychache__
-/migrations
+*.sqlite3
+
+*/__pycache__/
+
+*/migrations/
