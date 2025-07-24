@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,12 +26,14 @@ SECRET_KEY = 'django-insecure-(inut3_bo)=9g*t7s%2181b08z&7v%kgtbp3=+!udcvobenui*
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
+    'channels',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -38,12 +41,20 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     #custom apps
+    'rest_framework',
+    'corsheaders',
     'authentication',
+    'blogs',
+    'groups',
+    'chat',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    
+    'corsheaders.middleware.CorsMiddleware',
+
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -68,8 +79,8 @@ TEMPLATES = [
     },
 ]
 
+ASGI_APPLICATION = "blog_app_backend.asgi.application"
 WSGI_APPLICATION = 'blog_app_backend.wsgi.application'
-
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
@@ -126,9 +137,50 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 #custom changes
 
+MEDIA_ROOT = os.path.join(BASE_DIR, "files-data")
+MEDIA_URL = "media/"
+
 AUTH_USER_MODEL = "authentication.User"
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_METHODS = (
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+)
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8000",
+    "http://172.16.1.24:8000",
+    "http://localhost:3000",
+]
+
+
+
+CORS_ORIGIN_WHITELIST = [
+        'http://localhost:3000',
+        'http://172.16.1.24:3000',
+    ]
+
+
+CORS_ORIGIN_ALLOW_ALL = True
+
+ALLOWED_HOSTS = [
+    "localhost",
+    "172.16.1.24",
+]
+DOMAIN_ORIGIN = "http://localhost:8000"
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",
+    "http://172.16.1.24:3000",
+]
+
 
 #rest-framework
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.BasicAuthentication',
@@ -138,10 +190,15 @@ REST_FRAMEWORK = {
     )
 }
 
-SIMPLE_JWT ={
+SIMPLE_JWT = {
     "AUTH_TOKEN_CLASSES": (
         "rest_framework_simplejwt.tokens.AccessToken",
         "rest_framework_simplejwt.tokens.RefreshToken",
     ),
 }
 
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}

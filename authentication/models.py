@@ -1,13 +1,95 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ObjectDoesNotExist
+from django.apps import apps
 
 from rest_framework import authentication
-from rest_framework import exceptions
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
+import os
+
+def user_images_dir(instance, filename):
+    return os.path.join("users",instance.username,filename)
+default_user_images_dir = os.path.join("users","amr","amr.jpg")
+
+
+### custom friends object
+class Friends:
+    def __init__(self, friends, friends_request, user_requests):
+        self.friends, self.friends_requests, self.user_requests = friends, friends_request, user_requests
 
 class User(AbstractUser):
-    pass
+    bio = models.CharField(max_length=100, null=True)
+    profile_image = models.ImageField(upload_to=user_images_dir, default=default_user_images_dir)
+    background_image = models.ImageField(upload_to=user_images_dir, default=default_user_images_dir)
+    friends_number = models.IntegerField(default=0)
+    friends = models.ManyToManyField("self", through="FriendShip", related_name="friends_set", symmetrical=False)
+
+    def get_friends(self, own_user=False):
+        all_friends = self.friends.all() | self.friends_set.all()
+        FriendShip = apps.get_model("authentication", "FriendShip")
+        friends = []
+        friends_requests = []
+        user_requests = []
+        for friend in all_friends:
+            friend_ship = FriendShip.objects.get_friend_ship(self, friend)
+            if friend_ship.user1_status and friend_ship.user2_status:
+                friends.append(friend)
+            elif own_user and friend_ship.is_requesting(friend):
+                friends_requests.append(friend)
+            elif own_user and friend_ship.is_requesting(self):
+                user_requests.append(friend)
+        return Friends(friends, friends_requests, user_requests)
+            
+                
+#### custom friendship manager
+class FriendShipManager(models.Manager):
+    def get_friend_ship(self, user1, user2):
+        return self.get(models.Q(user1=user1, user2=user2)|models.Q(user1=user2, user2=user1))
+        
+
+
+class FriendShip(models.Model):
+    user1 = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="friends1")
+    user2 = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="friends2")
+    user1_status = models.BooleanField(default=True)
+    user2_status = models.BooleanField(default=False)
+    objects = FriendShipManager()
+
+    def is_requesting(self, user):
+        if(user==self.user1):
+            return self.user1_status
+        elif(user==self.user2):
+            return self.user2_status
+        else:
+            raise ObjectDoesNotExist()
+    
+
+    def save(self, *args, **kwargs):
+        try:
+            old_obj = FriendShip.objects.get(id=self.id)
+            if not(old_obj.user1_status and old_obj.user2_status) and (self.user1_status and self.user2_status):
+                self.user1.friends_number+=1
+                self.user2.friends_number+=1
+            elif not(self.user1_status and self.user2_status) and (old_obj.user1_status and old_obj.user2_status):
+                self.user1.friends_number-=1
+                self.user2.friends_number-=1
+        except FriendShip.DoesNotExist:
+            if(self.user1_status and self.user2_status):
+                self.user1.friends_number+=1
+                self.user2.friends_number+=1
+        self.user1.save()
+        self.user2.save()
+
+        return super().save(*args, **kwargs)
+    
+    def delete(self, *args, **kwargs):
+        if self.user1_status and self.user2_status:
+            self.user1.friends_number-=1
+            self.user2.friends_number-=1
+            self.user1.save()
+            self.user2.save()
+        return super().delete(*args, **kwargs)
 
 
 
@@ -25,3 +107,4 @@ class JWTAuthenticationCookies(authentication.BaseAuthentication):
             return None
         user = jwt_auth_obj.get_user(token)
         return (user, None)
+    
