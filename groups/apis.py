@@ -25,7 +25,7 @@ class CreateAPI(CreateAPIView):
     def get_serializer(self, instance=None, data=None, **kwargs):
         raw_data = data
         data = json.loads(raw_data.get("data"))
-        data["image"] = raw_data[data["image"]]
+        data["image"] = raw_data.get(data.get("image"))
         serializer = self.serializer_class(data=data, context={"request": self.request})
         return serializer
 
@@ -56,8 +56,8 @@ class GroupAPI(RetrieveUpdateDestroyAPIView):
         raw_data = data
         context={"request":self.request, "group_id":self.kwargs.get("id")}
         if(raw_data):
-            jr = JoinRequest.objects.filter(group=instance).filter(member=self.request.user)
-            if(not jr.admin):
+            jr = JoinRequest.objects.filter(group=instance, member=self.request.user)
+            if(not jr.exists() and not jr.first().admin):
                 raise BadRequest()
             data = json.loads(raw_data.get("data"))
             data["image"] = raw_data[data["image"]]
@@ -127,7 +127,7 @@ class RequestsAPI(APIView):
                 raise BadRequest()
             for member in members:
                 jr = JoinRequest.objects.filter(member=member, group=group)
-                if jr.exists():
+                if not jr.exists():
                     raise BadRequest()
                 Invite.objects.get_or_create(group=group, inviter=request.user, invited=member)
             return Response()

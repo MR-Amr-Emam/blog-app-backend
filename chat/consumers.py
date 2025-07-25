@@ -1,4 +1,3 @@
-import datetime
 import json
 from django.db.models import Q
 from django.apps import apps
@@ -7,6 +6,7 @@ from channels.generic.websocket import WebsocketConsumer
 from asgiref.sync import async_to_sync
 
 User = apps.get_model("authentication", "User")
+
 
 class ChatConsumer(WebsocketConsumer):
     def connect(self):
@@ -25,9 +25,8 @@ class ChatConsumer(WebsocketConsumer):
         )
         self.send(text_data=json.dumps(msgs.data))
 
-
     def disconnect(self, close_code):
-        pass
+        MsgChat.objects.filter(user_from=self.friend, user_to=self.scope["user"], viewed=False).update(viewed=True)
 
     def receive(self, text_data):
         text_data_json = json.loads(text_data)

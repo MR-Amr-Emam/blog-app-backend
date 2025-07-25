@@ -26,19 +26,19 @@ class User(AbstractUser):
     friends = models.ManyToManyField("self", through="FriendShip", related_name="friends_set", symmetrical=False)
 
     def get_friends(self, own_user=False):
-        all_friends = self.friends.all() | self.friends_set.all()
-        FriendShip = apps.get_model("authentication", "FriendShip")
-        friends = []
+        friends = (self.friends.filter(friends2__user1=self, friends2__user1_status=True, friends2__user2_status=True) | 
+                self.friends_set.filter(friends1__user2=self, friends1__user1_status=True, friends1__user2_status=True))
         friends_requests = []
         user_requests = []
-        for friend in all_friends:
-            friend_ship = FriendShip.objects.get_friend_ship(self, friend)
-            if friend_ship.user1_status and friend_ship.user2_status:
-                friends.append(friend)
-            elif own_user and friend_ship.is_requesting(friend):
-                friends_requests.append(friend)
-            elif own_user and friend_ship.is_requesting(self):
-                user_requests.append(friend)
+        if(own_user):
+            friends = friends.annotate(unseens=models.Count("msgs", filter=models.Q(msgs__user_to=self, msgs__viewed=False)))
+            friends = friends.order_by("-unseens")
+            friends_requests = (self.friends.filter(friends2__user1=self, friends2__user1_status=False, friends2__user2_status=True) | 
+                    self.friends_set.filter(friends1__user2=self, friends1__user1_status=True, friends1__user2_status=False))
+
+            user_requests = (self.friends.filter(friends2__user1=self, friends2__user1_status=True, friends2__user2_status=False) | 
+                    self.friends_set.filter(friends1__user2=self, friends1__user1_status=False, friends1__user2_status=True))
+
         return Friends(friends, friends_requests, user_requests)
             
                 

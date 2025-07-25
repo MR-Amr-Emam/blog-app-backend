@@ -30,13 +30,17 @@ class CreateBlogApi(CreateAPIView):
         data = json.loads(request_data.get("data"))
 
         data["user"] = user_dict
-        data["image"] = request_data[data["image"]]
+        data["image"] = request_data.get(data.get("image"))
         if data.get("is_video"):
             data["video"] = request_data["video"]
         else:
             for section in data["section_set"]:
                 if(request_data.get(section["image"])):
-                    section["image"] = request_data[section["image"]]
+                    section["image"] = request_data.get(section["image"])
+                else:
+                    section["image"] = None
+
+                    
         if data.get("for_group"):
             group = Group.objects.filter(id=data.get("group"))
             if (not group.exists() or not user.joinrequest_set.filter(group=group.first(), status=True).exists()):

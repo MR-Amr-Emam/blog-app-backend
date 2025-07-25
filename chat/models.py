@@ -10,6 +10,7 @@ class MsgChat(models.Model):
     msg = models.CharField(max_length=200)
     user_from = models.ForeignKey("authentication.User", related_name="msgs", on_delete=models.DO_NOTHING)
     user_to = models.ForeignKey("authentication.User", related_name="received_msgs", on_delete=models.DO_NOTHING)
+    viewed = models.BooleanField(default=False)
 
 class MsgChatSerializer(serializers.ModelSerializer):
     user_id = serializers.SerializerMethodField()
