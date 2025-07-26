@@ -2,7 +2,7 @@ from django.db import models
 from asgiref.sync import sync_to_async
 # Create your models here.
 from rest_framework import serializers
-from rest_framework_simplejwt.authentication import JWTAuthentication
+#from rest_framework_simplejwt.authentication import JWTAuthentication
 
 
 class MsgChat(models.Model):
