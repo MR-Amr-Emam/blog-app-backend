@@ -1,6 +1,9 @@
 from django.contrib.auth import authenticate
+from django.core.exceptions import BadRequest
 from rest_framework.views import APIView
-from rest_framework.generics import RetrieveAPIView, RetrieveUpdateAPIView, ListAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.generics import (RetrieveAPIView, RetrieveUpdateAPIView, 
+                                    ListAPIView, RetrieveUpdateDestroyAPIView,
+                                    )
 from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -61,6 +64,37 @@ class RefreshTokenAPI(APIView):
             path="/",
         )
         return response
+
+
+class CreateUserAPI(APIView):
+    def delete(self, request):
+        try:
+            User.objects.create_user(username=request.data.get("username"),
+                                     password=request.data.get("password"))
+            return Response()
+        except:
+            raise BadRequest()
+    
+    def delete(self, request):
+        response = Response()
+        response.set_cookie(
+            key="refresh_token",
+            value="",
+            secure=False,
+            httponly=False,
+            samesite="Lax",
+            path="/auth/token/refresh/",
+        )
+        response.set_cookie(
+            key="access_token",
+            value="",
+            secure=False,
+            httponly=False,
+            samesite="Lax",
+            path="/",
+        )
+        return response
+
 
 
 class UserProfileAPI(RetrieveUpdateAPIView):
