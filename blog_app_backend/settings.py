@@ -136,7 +136,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 #custom changes
-
+STATIC_ROOT = os.path.join(BASE_DIR, "static-files")
 MEDIA_ROOT = os.path.join(BASE_DIR, "files-data")
 MEDIA_URL = "media/"
 
@@ -154,7 +154,7 @@ CORS_ALLOW_METHODS = (
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:8000",
-    "http://172.16.1.24:8000",
+    "http://172.16.1.30:8000",
     "http://localhost:3000",
 ]
 
@@ -162,7 +162,7 @@ CORS_ALLOWED_ORIGINS = [
 
 CORS_ORIGIN_WHITELIST = [
         'http://localhost:3000',
-        'http://172.16.1.24:3000',
+        'http://172.16.1.30:3000',
     ]
 
 
@@ -170,12 +170,12 @@ CORS_ORIGIN_ALLOW_ALL = True
 
 ALLOWED_HOSTS = [
     "localhost",
-    "172.16.1.24",
+    "172.16.1.30",
 ]
-DOMAIN_ORIGIN = "http://localhost:8000"
+DOMAIN_ORIGIN = "http://172.16.1.30:8000"
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
-    "http://172.16.1.24:3000",
+    "http://172.16.1.30:3000",
 ]
 
 
