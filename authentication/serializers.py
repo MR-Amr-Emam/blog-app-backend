@@ -39,7 +39,7 @@ class Friend(serializers.Field):
         obj = {
             "id":value.id,
             "username":value.username,
-            "profile_image":settings.DOMAIN_ORIGIN + value.profile_image.url,
+            "profile_image": self.context.get("request").build_absolute_uri(value.profile_image.url),
         }
         if hasattr(value, "unseens"):
             obj["unseens"] = value.unseens

@@ -143,6 +143,8 @@ MEDIA_URL = "media/"
 AUTH_USER_MODEL = "authentication.User"
 CORS_ALLOW_CREDENTIALS = True
 
+USE_X_FORWARDED_HOST = True
+
 CORS_ALLOW_METHODS = (
     "DELETE",
     "GET",
@@ -154,16 +156,19 @@ CORS_ALLOW_METHODS = (
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:8000",
-    "http://172.16.1.30:8000",
+    "http://172.16.1.30",
+    "http://172.16.1.8000",
     "http://localhost:3000",
 ]
 
 
 
 CORS_ORIGIN_WHITELIST = [
-        'http://localhost:3000',
-        'http://172.16.1.30:3000',
-    ]
+    'http://localhost:3000',
+    'http://localhost:8000',
+    'http://172.16.1.30',
+    'http://172.16.1.30:8000',
+]
 
 
 CORS_ORIGIN_ALLOW_ALL = True
@@ -172,10 +177,14 @@ ALLOWED_HOSTS = [
     "localhost",
     "172.16.1.30",
 ]
-DOMAIN_ORIGIN = "http://172.16.1.30:8000"
+
+DOMAIN_ORIGIN = os.getenv("django_origin")
+
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
-    "http://172.16.1.30:3000",
+    "http://localhost:8000",
+    "http://172.16.1.30",
+    "http://172.16.1.30:8000",
 ]
 
 

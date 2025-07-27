@@ -1,3 +1,5 @@
+import os
+
 from django.contrib.auth import authenticate
 from django.core.exceptions import BadRequest
 from rest_framework.views import APIView
@@ -18,6 +20,7 @@ from .serializers import UserProfSerializer, MiniUserSerializer, FriendsSerializ
 class GetPairTokenAPI(APIView):
     def post(self, request):
         user = authenticate(username=request.POST.get("username"), password=request.POST.get("password"))
+        prefix = os.getenv("client_prefix") if os.getenv("client_prefix") else ""
         if user is not None:
             refresh = RefreshToken.for_user(user)
             access = refresh.access_token
@@ -28,7 +31,7 @@ class GetPairTokenAPI(APIView):
                 secure=False,
                 httponly=False,
                 samesite="Lax",
-                path="/auth/token/refresh/",
+                path=f"/{prefix}auth/token/refresh/",
             )
             response.set_cookie(
                 key="access_token",
@@ -36,7 +39,6 @@ class GetPairTokenAPI(APIView):
                 secure=False,
                 httponly=False,
                 samesite="Lax",
-                path="/",
             )
             return response
         else:

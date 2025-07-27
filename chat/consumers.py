@@ -11,6 +11,7 @@ User = apps.get_model("authentication", "User")
 class ChatConsumer(WebsocketConsumer):
     def connect(self):
         if(self.scope["user"].is_anonymous):
+            self.close()
             return
         self.accept()
         user = self.scope["user"]
