@@ -1,5 +1,7 @@
-import os
+import os, io
+from PIL import Image, ImageOps
 
+from django.core.files import File
 from django.db import models
 
 
@@ -14,6 +16,14 @@ class Group(models.Model):
     description = models.CharField(max_length=250)
     image = models.ImageField(default=default_user_images_dir, upload_to=user_images_dir)
     members = models.ManyToManyField(to="authentication.User", through="JoinRequest")
+
+    def save(self, *args, **kwargs):
+        image = ImageOps.exif_transpose(Image.open(self.image.file)).convert("RGB")
+        bytes = io.BytesIO()
+        image.save(bytes, format="jpeg", quality=40, optimize=True)
+        image = File(bytes, name=self.image.name)
+        self.image = image
+        return super().save(*args, **kwargs)
 
 
 class JoinRequest(models.Model):

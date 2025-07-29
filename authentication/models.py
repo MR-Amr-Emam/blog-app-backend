@@ -1,3 +1,6 @@
+from PIL import Image, ImageOps
+
+from django.core.files import File
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ObjectDoesNotExist
@@ -6,7 +9,7 @@ from django.apps import apps
 from rest_framework import authentication
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-import os
+import os, io
 
 def user_images_dir(instance, filename):
     return os.path.join("users",instance.username,filename)
@@ -40,6 +43,21 @@ class User(AbstractUser):
                     self.friends_set.filter(friends1__user2=self, friends1__user1_status=False, friends1__user2_status=True))
 
         return Friends(friends, friends_requests, user_requests)
+    
+    def save(self, *args, **kwargs):
+        image = ImageOps.exif_transpose(Image.open(self.profile_image.file)).convert("RGB")
+        bytes = io.BytesIO()
+        image.save(bytes, format="jpeg", quality=40, optimize=True)
+        image = File(bytes, name=self.profile_image.name)
+        self.profile_image = image
+
+        image = ImageOps.exif_transpose(Image.open(self.background_image.file)).convert("RGB")
+        bytes = io.BytesIO()
+        image.save(bytes, format="jpeg", quality=40, optimize=True)
+        image = File(bytes, name=self.background_image.name)
+        self.background_image = image
+
+        return super().save(*args, **kwargs)
             
                 
 #### custom friendship manager

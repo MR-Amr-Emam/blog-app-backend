@@ -86,3 +86,9 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = "__all__"
+
+class TinyBlogSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Blog
+        fields = ["id", "title", "image"]
+        read_only_fields = ["id", "title", "image"]

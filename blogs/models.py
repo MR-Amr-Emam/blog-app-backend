@@ -1,5 +1,7 @@
-import os
+import os, io
+from PIL import Image, ImageOps
 
+from django.core.files import File
 from django.db import models
 from django.core.exceptions import ValidationError
 
@@ -33,6 +35,15 @@ class Blog(models.Model):
     group = models.ForeignKey(to="groups.Group", on_delete=models.DO_NOTHING, null=True)
 
 
+    def save(self, *args, **kwargs):
+        image = ImageOps.exif_transpose(Image.open(self.image.file)).convert("RGB")
+        bytes = io.BytesIO()
+        image.save(bytes, format="jpeg", quality=40, optimize=True)
+        image = File(bytes, name=self.image.name)
+        self.image = image
+        return super().save(*args, **kwargs)
+
+
     def clean(self):
         super().clean()
         if(self.is_video and (not self.video)):
@@ -45,6 +56,16 @@ class Section(models.Model):
     blog = models.ForeignKey(to=Blog, on_delete=models.CASCADE)
     image = models.ImageField(null=True)
     content = models.TextField(null=False)
+
+    def save(self, *args, **kwargs):
+        if(not self.image):
+            return super().save(*args, **kwargs)
+        image = ImageOps.exif_transpose(Image.open(self.image.file)).convert("RGB")
+        bytes = io.BytesIO()
+        image.save(bytes, format="jpeg", quality=40, optimize=True)
+        image = File(bytes, name=self.image.name)
+        self.image = image
+        return super().save(*args, **kwargs)
 
 class Comment(models.Model):
     user = models.ForeignKey(to="authentication.User", on_delete=models.CASCADE)

@@ -1,10 +1,11 @@
 import os
-
+from django.apps import apps
+from django.db.models import Q
 from django.contrib.auth import authenticate
 from django.core.exceptions import BadRequest
 from rest_framework.views import APIView
 from rest_framework.generics import (RetrieveAPIView, RetrieveUpdateAPIView, 
-                                    ListAPIView, RetrieveUpdateDestroyAPIView,
+                                    RetrieveUpdateDestroyAPIView,
                                     )
 from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
 from rest_framework.response import Response
@@ -16,6 +17,12 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from .models import User, FriendShip
 from .serializers import UserProfSerializer, MiniUserSerializer, FriendsSerializer
 
+
+from blogs.serializers import TinyBlogSerializer
+from groups.serializers import MiniGroupSerializer
+
+Group = apps.get_model("groups", "group")
+Blog = apps.get_model("blogs", "Blog")
 
 class GetPairTokenAPI(APIView):
     def post(self, request):
@@ -132,13 +139,31 @@ class UserProfileAPI(RetrieveUpdateAPIView):
 
 
 
-class SearchUsers(ListAPIView):
+class SearchAPI(APIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = MiniUserSerializer
 
-    def get_queryset(self):
-        search_param = self.kwargs.get("search_param")
-        return User.objects.filter(username__contains=search_param)
+    def get(self, request, **kwargs):
+        search_type = kwargs.get("type")
+        search_param = kwargs.get("search_param")
+        users = User.objects.filter(username__contains=search_param)
+        blogs = Blog.objects.filter(Q(title__contains=search_param) | Q(description__contains=search_param))
+        groups = Group.objects.filter(Q(name__contains=search_param) | Q(description__contains=search_param))
+        context = {"request":request}
+        if(search_type=="all"):
+            res = {
+                "users":MiniUserSerializer(users[:3], context=context, many=True).data,
+                "blogs":TinyBlogSerializer(blogs[:3], context=context, many=True).data,
+                "groups":MiniGroupSerializer(groups[:3], context=context, many=True).data,
+            }
+        elif(search_type == "users"):
+            res = {"users": MiniUserSerializer(users, context=context, many=True).data}
+        elif(search_type == "blogs"):
+            res = {"blogs": TinyBlogSerializer(blogs, context=context, many=True).data}
+        elif(search_type == "groups"):
+            res = {"groups": MiniGroupSerializer(groups, context=context, many=True).data}
+        else:
+            raise BadRequest()
+        return Response(res)
 
 class SearchUsersById(APIView):
     permission_classes = [IsAuthenticated]
