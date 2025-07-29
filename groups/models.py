@@ -18,11 +18,12 @@ class Group(models.Model):
     members = models.ManyToManyField(to="authentication.User", through="JoinRequest")
 
     def save(self, *args, **kwargs):
-        image = ImageOps.exif_transpose(Image.open(self.image.file)).convert("RGB")
-        bytes = io.BytesIO()
-        image.save(bytes, format="jpeg", quality=40, optimize=True)
-        image = File(bytes, name=self.image.name)
-        self.image = image
+        if self.image.file.size >= 1024*512:
+            image = ImageOps.exif_transpose(Image.open(self.image.file)).convert("RGB")
+            bytes = io.BytesIO()
+            image.save(bytes, format="jpeg", quality=40, optimize=True)
+            image = File(bytes, name=self.image.name)
+            self.image = image
         return super().save(*args, **kwargs)
 
 

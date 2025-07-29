@@ -6,6 +6,13 @@ from django.db import models
 from django.core.exceptions import ValidationError
 
 
+def image_default_upload(instance, filename):
+    try:
+        return os.path.join("users", instance.user.username, "blogs", filename)
+    except:
+        return os.path.join("users", instance.blog.user.username, "blogs", filename)
+
+
 def validate_file_extension(value):
     """
     Custom validator to check the file extension of an uploaded file.
@@ -23,7 +30,7 @@ class Blog(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     is_video = models.BooleanField(default=False)
     category = models.ForeignKey(to="blogs.category", on_delete=models.DO_NOTHING, null=True, blank=True)
-    image = models.ImageField()
+    image = models.ImageField(upload_to=image_default_upload)
     video = models.FileField(null=True, blank=True, validators=[validate_file_extension])
     title = models.CharField(max_length=70)
     description = models.CharField(max_length=200)
@@ -36,11 +43,12 @@ class Blog(models.Model):
 
 
     def save(self, *args, **kwargs):
-        image = ImageOps.exif_transpose(Image.open(self.image.file)).convert("RGB")
-        bytes = io.BytesIO()
-        image.save(bytes, format="jpeg", quality=40, optimize=True)
-        image = File(bytes, name=self.image.name)
-        self.image = image
+        if self.image.file.size >= 1024*512:
+            image = ImageOps.exif_transpose(Image.open(self.image.file)).convert("RGB")
+            bytes = io.BytesIO()
+            image.save(bytes, format="jpeg", quality=40, optimize=True)
+            image = File(bytes, name=self.image.name)
+            self.image = image
         return super().save(*args, **kwargs)
 
 
@@ -54,17 +62,18 @@ class Blog(models.Model):
 
 class Section(models.Model):
     blog = models.ForeignKey(to=Blog, on_delete=models.CASCADE)
-    image = models.ImageField(null=True)
+    image = models.ImageField(null=True, upload_to=image_default_upload)
     content = models.TextField(null=False)
 
     def save(self, *args, **kwargs):
         if(not self.image):
             return super().save(*args, **kwargs)
-        image = ImageOps.exif_transpose(Image.open(self.image.file)).convert("RGB")
-        bytes = io.BytesIO()
-        image.save(bytes, format="jpeg", quality=40, optimize=True)
-        image = File(bytes, name=self.image.name)
-        self.image = image
+        if self.image.file.size >= 1024*512:
+            image = ImageOps.exif_transpose(Image.open(self.image.file)).convert("RGB")
+            bytes = io.BytesIO()
+            image.save(bytes, format="jpeg", quality=40, optimize=True)
+            image = File(bytes, name=self.image.name)
+            self.image = image
         return super().save(*args, **kwargs)
 
 class Comment(models.Model):

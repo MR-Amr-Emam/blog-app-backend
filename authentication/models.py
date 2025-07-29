@@ -13,7 +13,9 @@ import os, io
 
 def user_images_dir(instance, filename):
     return os.path.join("users",instance.username,filename)
-default_user_images_dir = os.path.join("users","amr","amr.jpg")
+
+
+default_user_images_dir = os.path.join("default","profile_image.png")
 
 
 ### custom friends object
@@ -22,7 +24,7 @@ class Friends:
         self.friends, self.friends_requests, self.user_requests = friends, friends_request, user_requests
 
 class User(AbstractUser):
-    bio = models.CharField(max_length=100, null=True)
+    bio = models.CharField(max_length=100, null=True, blank=True)
     profile_image = models.ImageField(upload_to=user_images_dir, default=default_user_images_dir)
     background_image = models.ImageField(upload_to=user_images_dir, default=default_user_images_dir)
     friends_number = models.IntegerField(default=0)
@@ -45,21 +47,23 @@ class User(AbstractUser):
         return Friends(friends, friends_requests, user_requests)
     
     def save(self, *args, **kwargs):
-        image = ImageOps.exif_transpose(Image.open(self.profile_image.file)).convert("RGB")
-        bytes = io.BytesIO()
-        image.save(bytes, format="jpeg", quality=40, optimize=True)
-        image = File(bytes, name=self.profile_image.name)
-        self.profile_image = image
+        if self.profile_image.file.size >= 1024*512:
+            image = ImageOps.exif_transpose(Image.open(self.profile_image.file)).convert("RGB")
+            bytes = io.BytesIO()
+            image.save(bytes, format="jpeg", quality=40, optimize=True)
+            image = File(bytes, name=self.profile_image.name)
+            self.profile_image = image
 
-        image = ImageOps.exif_transpose(Image.open(self.background_image.file)).convert("RGB")
-        bytes = io.BytesIO()
-        image.save(bytes, format="jpeg", quality=40, optimize=True)
-        image = File(bytes, name=self.background_image.name)
-        self.background_image = image
+        if self.background_image.file.size >= 1024*512:
+            image = ImageOps.exif_transpose(Image.open(self.background_image.file)).convert("RGB")
+            bytes = io.BytesIO()
+            image.save(bytes, format="jpeg", quality=40, optimize=True)
+            image = File(bytes, name=self.background_image.name)
+            self.background_image = image
 
         return super().save(*args, **kwargs)
             
-                
+            
 #### custom friendship manager
 class FriendShipManager(models.Manager):
     def get_friend_ship(self, user1, user2):

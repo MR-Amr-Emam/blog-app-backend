@@ -5,7 +5,7 @@ from django.core.exceptions import BadRequest
 
 from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
-from rest_framework.exceptions import AuthenticationFailed, NotFound, NotAcceptable
+from rest_framework.exceptions import NotFound, NotAcceptable, MethodNotAllowed
 from rest_framework.parsers import MultiPartParser, FormParser
 
 
@@ -77,6 +77,9 @@ class BlogApi(RetrieveUpdateDestroyAPIView):
 
     def get_object(self):
         obj = super().get_object()
+        if(self.request.method not in SAFE_METHODS and self.request.user != obj.user):
+            raise MethodNotAllowed()
+
         try:
             obj.viewed_people.get(id = self.request.user.id)
         except User.DoesNotExist:

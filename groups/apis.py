@@ -126,9 +126,6 @@ class RequestsAPI(APIView):
             if (not qs.exists()):
                 raise BadRequest()
             for member in members:
-                jr = JoinRequest.objects.filter(member=member, group=group)
-                if not jr.exists():
-                    raise BadRequest()
                 Invite.objects.get_or_create(group=group, inviter=request.user, invited=member)
             return Response()
 
