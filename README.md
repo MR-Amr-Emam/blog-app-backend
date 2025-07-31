@@ -19,5 +19,19 @@ daphne blog_app_backend.asgi:application
 ```
 
 ### Note
+
 *django app is configured with MySQL database
+
 *ASGI server is used for realtime application for websocket communication
+
+*you can look at all Apis endpoint in url http://localhost:8000/swagger/
+
+here is glimpse for these endpoints
+
+[auth apis](https://drive.google.com/file/d/1k3xPrgGW7OJV55cqsHrJmbSjF8DQOMki/view?usp=drive_link)
+
+[blogs apis](https://drive.google.com/file/d/1r9i9sAaovZzyqKeqbj20_u0tCjNONha9/view?usp=drive_link)
+
+[groups apis](https://drive.google.com/file/d/1qXpQy_QXRrPCDim4l3Z0MBAq06fHM-Lv/view?usp=drive_link)
+
+APIS EndPoints
