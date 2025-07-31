@@ -47,17 +47,17 @@ class User(AbstractUser):
         return Friends(friends, friends_requests, user_requests)
     
     def save(self, *args, **kwargs):
-        if self.profile_image.file.size >= 1024*512:
+        if self.profile_image.file.size >= 1024*256:
             image = ImageOps.exif_transpose(Image.open(self.profile_image.file)).convert("RGB")
             bytes = io.BytesIO()
-            image.save(bytes, format="jpeg", quality=40, optimize=True)
+            image.save(bytes, format="jpeg", quality=20, optimize=True)
             image = File(bytes, name=self.profile_image.name)
             self.profile_image = image
 
         if self.background_image.file.size >= 1024*512:
             image = ImageOps.exif_transpose(Image.open(self.background_image.file)).convert("RGB")
             bytes = io.BytesIO()
-            image.save(bytes, format="jpeg", quality=40, optimize=True)
+            image.save(bytes, format="jpeg", quality=20, optimize=True)
             image = File(bytes, name=self.background_image.name)
             self.background_image = image
 

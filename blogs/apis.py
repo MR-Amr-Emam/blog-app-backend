@@ -77,7 +77,7 @@ class BlogApi(RetrieveUpdateDestroyAPIView):
 
     def get_object(self):
         obj = super().get_object()
-        if(self.request.method not in SAFE_METHODS and self.request.user != obj.user):
+        if(self.request.method == "DELETE" and self.request.user != obj.user):
             raise MethodNotAllowed()
 
         try:

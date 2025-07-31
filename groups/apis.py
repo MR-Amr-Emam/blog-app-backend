@@ -42,7 +42,10 @@ class GroupsAPI(ListAPIView):
     serializer_class = MiniGroupSerializer
 
     def get_queryset(self, *args, **kwargs):
-        user = User.objects.get(id=self.kwargs.get("id"))
+        if(self.kwargs.get("id")==0):
+            user = self.request.user
+        else:
+            user = User.objects.get(id=self.kwargs.get("id"))
         return Group.objects.filter(Q(joinrequest__member=user) & Q(joinrequest__status=True))
 
 class GroupAPI(RetrieveUpdateDestroyAPIView):

@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     #custom apps
+    'drf_yasg',
     'rest_framework',
     'corsheaders',
     'authentication',
@@ -87,8 +88,12 @@ WSGI_APPLICATION = 'blog_app_backend.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'blog-app',
+        'USER': 'root',
+        'PASSWORD': 'amr_emam',
+        'HOST': 'localhost',  # Or the IP address/hostname of your MySQL server
+        'PORT': '3306',
     }
 }
 

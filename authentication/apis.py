@@ -76,7 +76,7 @@ class RefreshTokenAPI(APIView):
 
 
 class CreateUserAPI(APIView):
-    def delete(self, request):
+    def post(self, request):
         try:
             User.objects.create_user(username=request.data.get("username"),
                                      password=request.data.get("password"))
