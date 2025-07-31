@@ -1,13 +1,13 @@
-#Backend for my blog app with Djagno
+# Backend for my blog app with Djagno
 
-###apps
+### apps
 the project generally consisted of three apps
 
 1- **Auth App** that is for handling users info, authentication and authorization staffs
 2- **Blogs App**
 3- **Groups App**
 
-###How to run
+### How to run
 there is two options
 1-run with django development server integrated with Daphne ASGI server just run in command line in project main directory
 ```
