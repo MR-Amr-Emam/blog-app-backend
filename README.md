@@ -28,9 +28,9 @@ daphne blog_app_backend.asgi:application
 
 here is glimpse for these endpoints
 
-![auth apis](https://drive.google.com/file/d/1k3xPrgGW7OJV55cqsHrJmbSjF8DQOMki/view?usp=drive_link)
+<img width="953" height="504" alt="auth-api" src="https://github.com/user-attachments/assets/63d9aec7-c60e-4d55-b8e4-f55fbe2bbecf" />
 
-![blogs apis](https://drive.google.com/file/d/1r9i9sAaovZzyqKeqbj20_u0tCjNONha9/view?usp=drive_link)
+<img width="714" height="573" alt="blog-api" src="https://github.com/user-attachments/assets/932cafaf-be3b-49c3-a79b-c64f273e2a88" />
 
-![groups apis](https://drive.google.com/file/d/1qXpQy_QXRrPCDim4l3Z0MBAq06fHM-Lv/view?usp=drive_link)
+<img width="952" height="392" alt="group-api" src="https://github.com/user-attachments/assets/32c09671-4e52-4bc1-9bb2-af2a128315da" />
 
