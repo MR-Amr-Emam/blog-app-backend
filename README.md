@@ -17,3 +17,7 @@ python manage.py runserver
 ```
 daphne blog_app_backend.asgi:application
 ```
+
+### Note
+*django app is configured with MySQL database
+*ASGI server is used for realtime application for websocket communication
